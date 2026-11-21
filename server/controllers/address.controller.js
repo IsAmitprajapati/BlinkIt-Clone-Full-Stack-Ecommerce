@@ -1,14 +1,25 @@
 import AddressModel from "../models/address.model.js";
 import UserModel from "../models/user.model.js"; 
 
+const isValidPincode = (pincode) => /^[1-9]\d{5}$/.test(String(pincode ?? ""));
+
 export const addAddressController = async(request,response)=>{
     try {
         const userId = request.userId // middleware
-        const { address_line , city, state, pincode, country,mobile } = request.body
+        const { address_line , city, district, state, pincode, country,mobile } = request.body
+
+        if (!isValidPincode(pincode)) {
+            return response.status(400).json({
+                message : "Enter a valid 6-digit Indian PIN code",
+                error : true,
+                success : false
+            })
+        }
 
         const createAddress = new AddressModel({
             address_line,
             city,
+            district,
             state,
             country,
             pincode,
@@ -63,11 +74,20 @@ export const getAddressController = async(request,response)=>{
 export const updateAddressController = async(request,response)=>{
     try {
         const userId = request.userId // middleware auth 
-        const { _id, address_line,city,state,country,pincode, mobile } = request.body 
+        const { _id, address_line,city,district,state,country,pincode, mobile } = request.body
+
+        if (!isValidPincode(pincode)) {
+            return response.status(400).json({
+                message : "Enter a valid 6-digit Indian PIN code",
+                error : true,
+                success : false
+            })
+        }
 
         const updateAddress = await AddressModel.updateOne({ _id : _id, userId : userId },{
             address_line,
             city,
+            district,
             state,
             country,
             mobile,

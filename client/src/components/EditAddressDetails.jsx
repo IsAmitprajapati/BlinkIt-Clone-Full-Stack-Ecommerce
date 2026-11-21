@@ -6,14 +6,16 @@ import toast from 'react-hot-toast'
 import AxiosToastError from '../utils/AxiosToastError'
 import { IoClose } from "react-icons/io5";
 import { useGlobalContext } from '../provider/GlobalProvider'
+import { getSimdegaLocality, SIMDEGA_LOCALITIES } from '../data/simdegaLocations'
 
 const EditAddressDetails = ({close, data}) => {
-    const { register, handleSubmit,reset } = useForm({
+    const { register, handleSubmit,reset,setValue,formState : { errors } } = useForm({
         defaultValues : {
             _id : data._id,
             userId : data.userId,
             address_line :data.address_line,
             city : data.city,
+            district : data.district,
             state : data.state,
             country : data.country,
             pincode : data.pincode,
@@ -30,6 +32,7 @@ const EditAddressDetails = ({close, data}) => {
                     ...data,
                     address_line :data.address_line,
                     city : data.city,
+                    district : data.district,
                     state : data.state,
                     country : data.country,
                     pincode : data.pincode,
@@ -51,6 +54,7 @@ const EditAddressDetails = ({close, data}) => {
             AxiosToastError(error)
         }
     }
+    const cityField = register("city",{required : true})
   return (
     <section className='bg-black fixed top-0 left-0 right-0 bottom-0 z-50 bg-opacity-70 h-screen overflow-auto'>
         <div className='bg-white p-4 w-full max-w-lg mt-8 mx-auto rounded'>
@@ -71,12 +75,37 @@ const EditAddressDetails = ({close, data}) => {
                     />
                 </div>
                 <div className='grid gap-1'>
-                    <label htmlFor='city'>City :</label>
+                    <label htmlFor='city'>Town / village / locality :</label>
                     <input
                         type='text'
                         id='city' 
+                        list='simdega-localities'
                         className='border bg-blue-50 p-2 rounded'
-                        {...register("city",{required : true})}
+                        {...cityField}
+                        onChange={(event) => {
+                            cityField.onChange(event)
+                            const locality = getSimdegaLocality(event.target.value)
+                            if (locality) {
+                                setValue("district", "Simdega")
+                                setValue("state", "Jharkhand")
+                                setValue("country", "India")
+                                setValue("pincode", locality.pincode)
+                            }
+                        }}
+                    />
+                    <datalist id='simdega-localities'>
+                        {SIMDEGA_LOCALITIES.map((locality) => (
+                            <option key={locality.name} value={locality.name} />
+                        ))}
+                    </datalist>
+                </div>
+                <div className='grid gap-1'>
+                    <label htmlFor='district'>District :</label>
+                    <input
+                        type='text'
+                        id='district'
+                        className='border bg-blue-50 p-2 rounded'
+                        {...register("district")}
                     />
                 </div>
                 <div className='grid gap-1'>
@@ -94,8 +123,12 @@ const EditAddressDetails = ({close, data}) => {
                         type='text'
                         id='pincode' 
                         className='border bg-blue-50 p-2 rounded'
-                        {...register("pincode",{required : true})}
+                        {...register("pincode",{
+                            required : "PIN code is required",
+                            pattern : { value : /^[1-9]\d{5}$/, message : "Enter a valid 6-digit Indian PIN code" }
+                        })}
                     />
+                    {errors.pincode && <p className='text-red-500 text-sm'>{errors.pincode.message}</p>}
                 </div>
                 <div className='grid gap-1'>
                     <label htmlFor='country'>Country :</label>
