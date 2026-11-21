@@ -99,7 +99,7 @@ const CheckoutPage = () => {
                       </div>
                       <div>
                         <p>{address.address_line}</p>
-                        <p>{address.city}</p>
+                        <p>{address.city}{address.district ? `, ${address.district}` : ""}</p>
                         <p>{address.state}</p>
                         <p>{address.country} - {address.pincode}</p>
                         <p>{address.mobile}</p>

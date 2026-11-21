@@ -9,12 +9,18 @@ const addressSchema = new mongoose.Schema({
         type : String,
         default : ""
     },
+    district : {
+        type : String,
+        default : ""
+    },
     state : {
         type : String,
         default : ""
     },
     pincode : {
-        type : String
+        type : String,
+        required : true,
+        match : /^[1-9]\d{5}$/
     },
     country : {
         type : String
